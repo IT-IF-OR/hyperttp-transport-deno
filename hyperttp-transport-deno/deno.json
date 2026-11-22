@@ -1,0 +1,23 @@
+{
+  "name": "@hyperttp/transport-deno",
+  "version": "0.1.0",
+  "exports": "./src/index.ts",
+  "imports": {
+    "@hyperttp/types": "npm:@hyperttp/types@^0.5.4"
+  },
+  "tasks": {
+    "check": "deno check src/index.ts"
+  },
+  "unstable": ["no-legacy-abort"],
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "lib": [
+      "deno.ns",
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
