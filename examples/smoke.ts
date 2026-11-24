@@ -1,4 +1,4 @@
-import { DenoTransport } from "../src/index.ts";
+import { DenoTransport } from "../src/index.js";
 
 const transport = new DenoTransport({ network: { timeout: 5_000 } });
 const server = await transport.listen({

@@ -25,6 +25,8 @@ export interface DenoTransportConfig {
   /** Base URL used to resolve relative request URLs. */
   baseUrl?: string;
   network?: {
+    /** Allows HTTP/2 for client connections. Default: true. Response trailers are not exposed by Fetch. */
+    http2?: boolean;
     /** Global request timeout in milliseconds. 0 disables the timeout. */
     timeout?: number;
     /** Maximum active requests. 0 means unlimited. */

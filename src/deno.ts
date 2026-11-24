@@ -94,9 +94,7 @@ export class DenoTransport implements HyperTransport {
     this.maxConcurrent = Number.isFinite(network?.maxConcurrent)
       ? Math.max(0, Math.floor(network?.maxConcurrent ?? 0))
       : 0;
-    this.timeout = Number.isFinite(network?.timeout)
-      ? Math.max(0, network?.timeout ?? 0)
-      : 0;
+    this.timeout = Number.isFinite(network?.timeout) ? Math.max(0, network?.timeout ?? 0) : 0;
 
     const cookieConfig = network?.cookieCache;
     this.cookieCacheEnabled = cookieConfig?.enabled ?? true;
@@ -104,14 +102,19 @@ export class DenoTransport implements HyperTransport {
     this.cookieCacheTtl = Math.max(0, cookieConfig?.ttl ?? 300_000);
 
     const responseCacheConfig = network?.cache;
-    this.responseCacheEnabled = responseCacheConfig?.enabled ?? Boolean(
-      responseCacheConfig &&
-      (responseCacheConfig.maxSize !== undefined || responseCacheConfig.ttl !== undefined),
-    );
+    this.responseCacheEnabled =
+      responseCacheConfig?.enabled ??
+      Boolean(
+        responseCacheConfig &&
+        (responseCacheConfig.maxSize !== undefined || responseCacheConfig.ttl !== undefined),
+      );
     this.responseCacheMaxSize = Math.max(1, Math.floor(responseCacheConfig?.maxSize ?? 256));
     this.responseCacheTtl = Math.max(0, responseCacheConfig?.ttl ?? 30_000);
 
-    const clientOptions = this.resolveHttpClientOptions(network?.httpClient, network?.keepAliveTimeout);
+    const clientOptions = this.resolveHttpClientOptions(
+      network?.httpClient,
+      network?.keepAliveTimeout,
+    );
     if (Object.keys(clientOptions).length > 0) {
       if (typeof Deno.createHttpClient !== "function") {
         throw new Error("This Deno runtime does not expose Deno.createHttpClient().");
@@ -151,42 +154,39 @@ export class DenoTransport implements HyperTransport {
 
     let server: Deno.HttpServer;
     try {
-      server = Deno.serve(
-        serveOptions,
-        async (request) => {
-          if (!options.onRequest) return new Response(null, { status: 503 });
+      server = Deno.serve(serveOptions, async (request) => {
+        if (!options.onRequest) return new Response(null, { status: 503 });
 
-          const headers: Record<string, string> = Object.create(null);
-          request.headers.forEach((value, key) => {
-            headers[key.toLowerCase()] = value;
-          });
+        const headers: Record<string, string> = Object.create(null);
+        request.headers.forEach((value, key) => {
+          headers[key.toLowerCase()] = value;
+        });
 
-          const incoming: TransportRequest = {
-            method: request.method,
-            url: request.url,
-            headers,
-            body: request.body,
-            signal: request.signal,
-            protocol: "rest",
-          };
-          const outgoing = await options.onRequest(incoming);
-          const responseHeaders = new Headers();
+        const incoming: TransportRequest = {
+          method: request.method,
+          url: request.url,
+          headers,
+          body: request.body,
+          signal: request.signal,
+          protocol: "rest",
+        };
+        const outgoing = await options.onRequest(incoming);
+        const responseHeaders = new Headers();
 
-          for (const [name, value] of Object.entries(outgoing.headers)) {
-            if (Array.isArray(value)) {
-              for (const item of value) responseHeaders.append(name, item);
-            } else {
-              responseHeaders.set(name, value);
-            }
+        for (const [name, value] of Object.entries(outgoing.headers)) {
+          if (Array.isArray(value)) {
+            for (const item of value) responseHeaders.append(name, item);
+          } else {
+            responseHeaders.set(name, value);
           }
+        }
 
-          return new Response(outgoing.body as BodyInit | null | undefined, {
-            status: outgoing.status,
-            ...(outgoing.statusText !== undefined ? { statusText: outgoing.statusText } : {}),
-            headers: responseHeaders,
-          });
-        },
-      );
+        return new Response(outgoing.body as BodyInit | null | undefined, {
+          status: outgoing.status,
+          ...(outgoing.statusText !== undefined ? { statusText: outgoing.statusText } : {}),
+          headers: responseHeaders,
+        });
+      });
     } catch (error) {
       options.signal?.removeEventListener("abort", onExternalAbort);
       throw error;
@@ -285,7 +285,13 @@ export class DenoTransport implements HyperTransport {
         request.body == null &&
         nativeResponse.body === null
       ) {
-        this.setCache(this.responseCache, cacheKey, response, this.responseCacheMaxSize, this.responseCacheTtl);
+        this.setCache(
+          this.responseCache,
+          cacheKey,
+          response,
+          this.responseCacheMaxSize,
+          this.responseCacheTtl,
+        );
       }
 
       return response;
@@ -308,7 +314,7 @@ export class DenoTransport implements HyperTransport {
     configured: DenoHttpClientOptions | undefined,
     keepAliveTimeout: number | undefined,
   ): DenoHttpClientOptions {
-    const options: DenoHttpClientOptions = { ...(configured ?? {}) };
+    const options: DenoHttpClientOptions = { ...configured };
     const cert = "cert" in options ? options.cert : undefined;
     const key = "key" in options ? options.key : undefined;
     if ((cert && !key) || (!cert && key)) {
@@ -316,6 +322,9 @@ export class DenoTransport implements HyperTransport {
     }
     if (keepAliveTimeout !== undefined && options.poolIdleTimeout === undefined) {
       options.poolIdleTimeout = keepAliveTimeout;
+    }
+    if (this.config.network?.http2 !== undefined && options.http2 === undefined) {
+      options.http2 = this.config.network.http2;
     }
     return options;
   }
@@ -465,7 +474,10 @@ export class DenoTransport implements HyperTransport {
           const trimmed = attribute.trim();
           if (trimmed.toLowerCase().startsWith("domain=")) {
             const supplied = trimmed.slice(7).trim().replace(/^\./, "").toLowerCase();
-            if (supplied && (defaultDomain === supplied || defaultDomain.endsWith(`.${supplied}`))) {
+            if (
+              supplied &&
+              (defaultDomain === supplied || defaultDomain.endsWith(`.${supplied}`))
+            ) {
               domain = supplied;
             } else {
               domain = "";

@@ -28,7 +28,9 @@ export function normalizeHeaders(
     const name = key.toLowerCase();
     const target = (output ??= Object.create(null));
     target[name] = Array.isArray(value)
-      ? name === "cookie" ? value.join("; ") : value.join(", ")
+      ? name === "cookie"
+        ? value.join("; ")
+        : value.join(", ")
       : String(value);
   }
   return output ?? EMPTY_HEADERS;
@@ -42,14 +44,18 @@ export function resolveUrl(baseUrl: string, value: string): string {
   }
 
   if (!baseUrl) {
-    throw new TypeError(`Cannot resolve relative URL "${value}" without DenoTransportConfig.baseUrl.`);
+    throw new TypeError(
+      `Cannot resolve relative URL "${value}" without DenoTransportConfig.baseUrl.`,
+    );
   }
 
   const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   return new URL(value, base).toString();
 }
 
-export function combineSignals(signals: readonly (AbortSignal | undefined)[]): AbortSignal | undefined {
+export function combineSignals(
+  signals: readonly (AbortSignal | undefined)[],
+): AbortSignal | undefined {
   const active = signals.filter((signal): signal is AbortSignal => signal !== undefined);
   if (active.length === 0) return undefined;
   if (active.length === 1) return active[0];

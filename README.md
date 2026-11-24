@@ -158,7 +158,7 @@ when the runtime version exposes it and that distinction matters to your applica
 From this package directory:
 
 ```bash
-deno run --allow-net examples/smoke.ts
+deno run --minimum-dependency-age=0 --allow-net --sloppy-imports examples/smoke.ts
 ```
 
 Type-check the source with:

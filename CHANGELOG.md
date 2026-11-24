@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3] - 2026-11-24
+
+### Added
+
+- Added the `http2` client-option declaration when the Deno transport entry point is imported.
+- Fetch-based `DenoTransport` remains REST-only.
+
 ## [0.1.0] - 2026-11-22
 
 ### Added

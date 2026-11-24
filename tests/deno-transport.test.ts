@@ -100,8 +100,18 @@ describe("DenoTransport", () => {
     });
 
     const transport = new DenoTransport();
-    await transport.execute({ url: "https://example.test/login", method: "POST", headers: {}, protocol: "rest" });
-    await transport.execute({ url: "https://example.test/profile", method: "GET", headers: {}, protocol: "rest" });
+    await transport.execute({
+      url: "https://example.test/login",
+      method: "POST",
+      headers: {},
+      protocol: "rest",
+    });
+    await transport.execute({
+      url: "https://example.test/profile",
+      method: "GET",
+      headers: {},
+      protocol: "rest",
+    });
 
     expect(requestCount).toBe(2);
     expect(secondCookie).toBe("session=abc");
@@ -117,7 +127,12 @@ describe("DenoTransport", () => {
     });
 
     const transport = new DenoTransport({ network: { cache: { enabled: true, maxSize: 8 } } });
-    const request = { url: "https://example.test/empty", method: "GET", headers: {}, protocol: "rest" as const };
+    const request = {
+      url: "https://example.test/empty",
+      method: "GET",
+      headers: {},
+      protocol: "rest" as const,
+    };
     await transport.execute(request);
     await transport.execute(request);
     expect(requestCount).toBe(1);
@@ -132,7 +147,11 @@ describe("DenoTransport", () => {
     let clientClosed = false;
     let clientOptions: Record<string, unknown> | undefined;
     let fetchInit: (RequestInit & { client?: unknown }) | undefined;
-    const client = { close: () => { clientClosed = true; } };
+    const client = {
+      close: () => {
+        clientClosed = true;
+      },
+    };
 
     stubDeno({
       createHttpClient(options) {
@@ -152,7 +171,12 @@ describe("DenoTransport", () => {
         httpClient: { poolMaxIdlePerHost: 8 },
       },
     });
-    await transport.execute({ url: "https://example.test/", method: "GET", headers: {}, protocol: "rest" });
+    await transport.execute({
+      url: "https://example.test/",
+      method: "GET",
+      headers: {},
+      protocol: "rest",
+    });
 
     expect(clientOptions?.poolMaxIdlePerHost).toBe(8);
     expect(clientOptions?.poolIdleTimeout).toBe(12_000);
@@ -170,7 +194,12 @@ describe("DenoTransport", () => {
       serve(options, callback) {
         serverOptions = options;
         handler = callback;
-        return { finished: Promise.resolve(), shutdown: async () => { shutdownCalls++; } };
+        return {
+          finished: Promise.resolve(),
+          shutdown: async () => {
+            shutdownCalls++;
+          },
+        };
       },
     });
 
@@ -268,17 +297,24 @@ describe("DenoTransport", () => {
     vi.stubGlobal("fetch", (_input: RequestInfo | URL, init?: RequestInit) => {
       observedSignal = init?.signal ?? undefined;
       return new Promise<Response>((_resolve, reject) => {
-        observedSignal?.addEventListener("abort", () => reject(observedSignal?.reason), { once: true });
+        observedSignal?.addEventListener("abort", () => reject(observedSignal?.reason), {
+          once: true,
+        });
       });
     });
 
     const transport = new DenoTransport();
-    const request = transport.execute({
-      url: "https://example.test/slow",
-      method: "GET",
-      headers: {},
-      protocol: "rest",
-    }).then(() => false, () => true);
+    const request = transport
+      .execute({
+        url: "https://example.test/slow",
+        method: "GET",
+        headers: {},
+        protocol: "rest",
+      })
+      .then(
+        () => false,
+        () => true,
+      );
 
     while (!observedSignal) await new Promise((resolve) => setTimeout(resolve, 0));
     await transport.destroy();

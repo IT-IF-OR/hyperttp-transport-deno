@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "exports": "./src/index.ts",
   "imports": {
-    "@hyperttp/types": "npm:@hyperttp/types@^0.5.4"
+    "@hyperttp/types": "npm:@hyperttp/types@^0.5.5"
   },
   "tasks": {
     "check": "deno check src/index.ts"
