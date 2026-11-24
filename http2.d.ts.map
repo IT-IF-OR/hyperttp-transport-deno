@@ -1,0 +1,1 @@
+{"version":3,"file":"http2.d.ts","sourceRoot":"","sources":["../src/http2.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,KAAK,oBAAoB,EAAE,MAAM,0BAA0B,CAAC;AAErF;;;;;GAKG;AACH,qBAAa,kBAAmB,SAAQ,cAAc;IACpD,YAAY,MAAM,GAAE,oBAAyB,EAE5C;CACF"}

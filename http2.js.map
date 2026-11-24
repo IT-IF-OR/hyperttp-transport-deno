@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/http2.ts"],
+  "sourcesContent": ["import { Http2Transport, type Http2TransportConfig } from \"@hyperttp/transport-node\";\n\n/**\n * @ru \u041F\u043E\u043B\u043D\u043E\u0446\u0435\u043D\u043D\u044B\u0439 HTTP/2 \u0442\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442 Deno \u0447\u0435\u0440\u0435\u0437 \u0441\u043E\u0432\u043C\u0435\u0441\u0442\u0438\u043C\u044B\u0439 `node:http2` API.\n * \u041D\u0443\u0436\u0435\u043D \u0434\u043B\u044F gRPC trailers; `DenoTransport` \u043D\u0430 Fetch API \u043F\u0440\u0435\u0434\u043D\u0430\u0437\u043D\u0430\u0447\u0435\u043D \u0434\u043B\u044F REST.\n * @en Full HTTP/2 Deno transport through the compatible `node:http2` API.\n * It supports gRPC trailers; Fetch-based `DenoTransport` remains for REST.\n */\nexport class DenoHttp2Transport extends Http2Transport {\n  constructor(config: Http2TransportConfig = {}) {\n    super(config);\n  }\n}\n"],
+  "mappings": "aAAA,OAAS,kBAAAA,MAAiD,2BAQpD,aAAO,2BAA2BA,CAAc,CACpD,YAAYC,EAA+B,CAAA,EAAE,CAC3C,MAAMA,CAAM,CACd,CAAA",
+  "names": ["Http2Transport", "config"]
+}
